@@ -175,13 +175,6 @@ class FirstFragment : Fragment() {
         takePhotoLauncher.launch(cameraIntent)
 
     }
-
-    fun getLocation() {
-
-
-    }
-
-
     private fun requestPermission() {
         if (ActivityCompat.checkSelfPermission(
                 requireContext(),
