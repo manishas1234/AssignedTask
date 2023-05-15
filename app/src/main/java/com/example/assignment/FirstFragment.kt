@@ -5,10 +5,12 @@ import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.location.Location
+import android.media.ExifInterface
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
-import androidx.fragment.app.Fragment
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -16,8 +18,13 @@ import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
+import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.example.assignment.databinding.FragmentFirstBinding
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.maps.GoogleMap
+
 
 /**
  * A simple [Fragment] subclass as the default destination in the navigation.
@@ -26,6 +33,13 @@ class FirstFragment : Fragment() {
 
     private var requestCamera: ActivityResultLauncher<String>? = null
     private var imageUri: Uri? = null
+    private lateinit var googleMap: GoogleMap
+    private var currentLocation: Location? = null
+    private var fusedLocationProviderClient: FusedLocationProviderClient? = null
+    private val requestCode = 101
+    var latitude: Double = 23.65
+    var longitude: Double = 23.65
+
 
     private var _binding: FragmentFirstBinding? = null
     private lateinit var takePhotoLauncher: ActivityResultLauncher<Intent>
@@ -51,10 +65,43 @@ class FirstFragment : Fragment() {
             }
 
         }
+        fusedLocationProviderClient =
+            LocationServices.getFusedLocationProviderClient(requireContext())
+        fetchLocation()
         activityResultLauncher(requireContext())
 
         return binding.root
 
+    }
+
+    private fun fetchLocation() {
+        if (ActivityCompat.checkSelfPermission(
+                requireContext(),
+                android.Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                requireContext(),
+                android.Manifest.permission.ACCESS_COARSE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            ActivityCompat.requestPermissions(
+                requireContext() as Activity,
+                arrayOf(android.Manifest.permission.ACCESS_COARSE_LOCATION),
+                requestCode
+            )
+            return
+        }
+        val task = fusedLocationProviderClient!!.lastLocation
+        task.addOnSuccessListener { location ->
+            if (location != null) {
+                currentLocation = location
+                latitude = currentLocation!!.latitude
+                Log.d("latitude", latitude.toString())
+                longitude = currentLocation!!.longitude
+
+
+            }
+
+        }
     }
 
     private fun activityResultLauncher(context: Context) {
@@ -67,7 +114,14 @@ class FirstFragment : Fragment() {
                 if (imageUri != null) {
                     try {
                         binding.imageView.setImageURI(imageUri)
+                        val path = imageUri!!.path
+                        val exif = path?.let { ExifInterface(it) }
+                        exif!!.setAttribute(ExifInterface.TAG_GPS_LATITUDE, latitude.toString())
+                        exif!!.setAttribute(ExifInterface.TAG_GPS_LONGITUDE, longitude.toString())
+                        exif!!.saveAttributes()
+
                     } catch (e: Exception) {
+
                         e.printStackTrace()
                     }
 
@@ -91,6 +145,7 @@ class FirstFragment : Fragment() {
                 ) == PackageManager.PERMISSION_GRANTED
             ) {
                 cameraOpen(requireContext())
+
             } else {
                 Toast.makeText(
                     requireContext(),
@@ -118,6 +173,11 @@ class FirstFragment : Fragment() {
         val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
         cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri)
         takePhotoLauncher.launch(cameraIntent)
+
+    }
+
+    fun getLocation() {
+
 
     }
 
