@@ -23,7 +23,6 @@ import androidx.navigation.fragment.findNavController
 import com.example.assignment.databinding.FragmentFirstBinding
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
-import com.google.android.gms.maps.GoogleMap
 
 
 /**
@@ -33,7 +32,6 @@ class FirstFragment : Fragment() {
 
     private var requestCamera: ActivityResultLauncher<String>? = null
     private var imageUri: Uri? = null
-    private lateinit var googleMap: GoogleMap
     private var currentLocation: Location? = null
     private var fusedLocationProviderClient: FusedLocationProviderClient? = null
     private val requestCode = 101
@@ -117,8 +115,8 @@ class FirstFragment : Fragment() {
                         val path = imageUri!!.path
                         val exif = path?.let { ExifInterface(it) }
                         exif!!.setAttribute(ExifInterface.TAG_GPS_LATITUDE, latitude.toString())
-                        exif!!.setAttribute(ExifInterface.TAG_GPS_LONGITUDE, longitude.toString())
-                        exif!!.saveAttributes()
+                        exif.setAttribute(ExifInterface.TAG_GPS_LONGITUDE, longitude.toString())
+                        exif.saveAttributes()
 
                     } catch (e: Exception) {
 
