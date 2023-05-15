@@ -35,8 +35,8 @@ class FirstFragment : Fragment() {
     private var currentLocation: Location? = null
     private var fusedLocationProviderClient: FusedLocationProviderClient? = null
     private val requestCode = 101
-    var latitude: Double = 23.65
-    var longitude: Double = 23.65
+    private var latitude: Double = 23.65
+    private var longitude: Double = 23.65
 
 
     private var _binding: FragmentFirstBinding? = null
@@ -49,7 +49,7 @@ class FirstFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
 
         _binding = FragmentFirstBinding.inflate(inflater, container, false)
         requestCamera = registerForActivityResult(ActivityResultContracts.RequestPermission()) {
@@ -66,7 +66,7 @@ class FirstFragment : Fragment() {
         fusedLocationProviderClient =
             LocationServices.getFusedLocationProviderClient(requireContext())
         fetchLocation()
-        activityResultLauncher(requireContext())
+        activityResultLauncher()
 
         return binding.root
 
@@ -102,7 +102,7 @@ class FirstFragment : Fragment() {
         }
     }
 
-    private fun activityResultLauncher(context: Context) {
+    private fun activityResultLauncher() {
 
         takePhotoLauncher = registerForActivityResult(
             ActivityResultContracts
